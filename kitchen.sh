@@ -1,23 +1,24 @@
 #!/usr/local/bin/bash
-# utilitymenu.sh - A sample shell script to display menus on screen
-# Store menu options selected by the user
+# 
+set -e
+#Load config file
 
 source ./config.cfg
+
+# Store menu options selected by the user
 
 INPUT=/tmp/menu.sh.$$
 
 # Storage file for displaying cal and date command output
+
 OUTPUT=/tmp/output.sh.$$
 
-# get text editor or fall back to vi_editor
-vi_editor=${EDITOR-vi}
-
 # trap and delete temp files
+
 trap "rm $OUTPUT; rm $INPUT; exit" SIGHUP SIGINT SIGTERM
 
-
-
 # Import Functions
+
 function import_functions {
 	DIR="functions"
 	# iterate through the files in the 'functions' folder
@@ -78,11 +79,8 @@ dialog --clear  --help-button --backtitle "ARMBSD Kitchen" \
 --menu "You can use the UP/DOWN arrow keys, the first \n\
 letter of the choice as a hot key, or the \n\
 number keys 1-9 to choose an option.\n\
-Choose the TASK" 15 50 5 \
+Choose the TASK" 15 50 2 \
 Build_kernel "Build kernel" \
-Date/time "Displays date and time" \
-Calendar "Displays a calendar" \
-Editor "Start a text editor" \
 Exit "Exit to the shell" 2>"${INPUT}"
 
 menuitem=$(<"${INPUT}")
@@ -91,9 +89,6 @@ menuitem=$(<"${INPUT}")
 # make decsion 
 case $menuitem in
 	Build_kernel) kernel_build_all;;
-	Date/time) show_date;;
-	Calendar) show_calendar;;
-	Editor) $vi_editor;;
 	Exit) echo "Bye"; break;;
 esac
 
@@ -102,3 +97,4 @@ done
 # if temp files found, delete em
 [ -f $OUTPUT ] && rm $OUTPUT
 [ -f $INPUT ] && rm $INPUT
+

@@ -1,6 +1,6 @@
 
 function kernel_build_all () {
-set -x
+
 #
 # Get path to SRC tree
 #
