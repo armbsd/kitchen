@@ -2,7 +2,7 @@
 # utilitymenu.sh - A sample shell script to display menus on screen
 # Store menu options selected by the user
 
-./config.sh
+source ./config.cfg
 
 INPUT=/tmp/menu.sh.$$
 
@@ -78,7 +78,8 @@ dialog --clear  --help-button --backtitle "ARMBSD Kitchen" \
 --menu "You can use the UP/DOWN arrow keys, the first \n\
 letter of the choice as a hot key, or the \n\
 number keys 1-9 to choose an option.\n\
-Choose the TASK" 15 50 4 \
+Choose the TASK" 15 50 5 \
+Build_kernel "Build kernel" \
 Date/time "Displays date and time" \
 Calendar "Displays a calendar" \
 Editor "Start a text editor" \
@@ -89,6 +90,7 @@ menuitem=$(<"${INPUT}")
 
 # make decsion 
 case $menuitem in
+	Build_kernel) kernel_build_all;;
 	Date/time) show_date;;
 	Calendar) show_calendar;;
 	Editor) $vi_editor;;

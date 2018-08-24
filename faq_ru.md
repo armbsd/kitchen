@@ -165,9 +165,14 @@ echo "Format disk!"
   newfs_msdos /dev/$disk
 echo "Format done!"
 ```
-### ARM BSD KITCHEN 
+### Как скачать исходники и откомпилированные части системы?
 
- Пункты меню 
-1. Сделать ядро 
-2. Сделать userlend
-3. Собрать прошику. 
+```
+fetch https://download.freebsd.org/ftp/snapshots/arm64/12.0-ALPHA3/base.txz
+fetch https://download.freebsd.org/ftp/snapshots/arm64/12.0-ALPHA3/kernel.txz
+fetch https://download.freebsd.org/ftp/snapshots/arm64/12.0-ALPHA3/src.txz
+```
+распаковываем
+```
+tar xvf  kernel.txz -C dir  
+```

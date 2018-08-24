@@ -1,21 +1,15 @@
 
 function kernel_build_all () {
-
+set -x
 #
 # Get path to SRC tree
 #
-if [ -z "$1" ]; then
-  echo "Usage: $0 path-to-svn-src-tree"
+if [ -d "SRC" ]; then
+  echo "This script could not find the folder and the source code:${SRC_DIR}
+"
   exit 1
 fi
 
-if [ ! -d "$1" ]; then
-  echo "Error: Provided path ($1) is not a directory"
-  exit 1
-fi
-
-export SRC=$(realpath $1)
-export MAKESYSPATH=$SRC/share/mk
 if [ ! -d "$MAKESYSPATH" ]; then
   echo "Error: Can't find svn src tree"
   exit 1
@@ -24,7 +18,9 @@ fi
 #
 # Create dirs
 #
-mkdir -p $ROOTFS $MAKEOBJDIRPREFIX
+mkdir  ${WORKSPACE}
+
+mkdir -p ${ROOTFS} ${MAKEOBJDIRPREFIX}
 #
 # Number of CPU for parallel build
 #
