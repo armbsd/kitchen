@@ -79,8 +79,9 @@ dialog --clear  --help-button --backtitle "ARMBSD Kitchen" \
 --menu "You can use the UP/DOWN arrow keys, the first \n\
 letter of the choice as a hot key, or the \n\
 number keys 1-9 to choose an option.\n\
-Choose the TASK" 15 50 2 \
+Choose the TASK" 15 50 3 \
 Build_kernel "Build kernel" \
+Format_disk "Format your USB disk!" \
 Exit "Exit to the shell" 2>"${INPUT}"
 
 menuitem=$(<"${INPUT}")
@@ -89,6 +90,7 @@ menuitem=$(<"${INPUT}")
 # make decsion 
 case $menuitem in
 	Build_kernel) kernel_build_all;;
+	Format_disk) format_disk;;
 	Exit) echo "Bye"; break;;
 esac
 
