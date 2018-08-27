@@ -2,7 +2,7 @@
 
 ###  About Kitchen 
 
-	Kitchen - it is bash script to build your own freebsd image for your arm device! 
+Kitchen - it is bash script to build your own freebsd image for your arm device! 
 
 ### Future plans to add functionality
 
@@ -15,6 +15,6 @@
 
 ### Contributing
 
-	1. You can fork this repository and add your changes
-	2. Also you can add to ours group talck in [telegram](https://t.me/armbsd)
+1. You can fork this repository and add your changes
+2. Also you can add to ours group talck in [telegram](https://t.me/armbsd)
 
