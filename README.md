@@ -18,3 +18,6 @@ Kitchen - it is bash script to build your own freebsd image for your arm device!
 1. You can fork this repository and add your changes
 2. Also you can join  to group talk in [telegram](https://t.me/armbsd)
 
+## Update from 18.02.2023
+
+- started rewriting script to the python.
