@@ -1,0 +1,31 @@
+#!/bin/bash
+# Based on https://github.com/golang/go/blob/release-branch.go1.1/misc/git/pre-commit
+# Copyright 2012 The Go Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license.
+
+# git gofmt pre-commit hook
+#
+# This script does not handle file names that contain spaces.
+
+CYAN='\033[0;36m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+
+py_hook () {
+    pyfiles=$(git diff --cached --name-only --diff-filter=ACM | grep '.py$')
+    [ -z "$pyfiles" ] && exit 0
+    echo $pyfiles
+    unformatted=$(ruff $pyfiles)
+    [ -z "$unformatted" ] && exit 0
+
+    # Some files are not ruff'd. Print message and fail.
+    echo >&2 -e "${RED}Python files must be formatted with ruff. Aborting!${NC}"
+    echo >&2 -e "${CYAN}Why is this? Take 5-minute read https://github.com/charliermarsh/ruff${NC}"
+    echo >&2 -e "${CYAN}The following problems were detected:${NC}"
+    echo >&2 -e "$unformatted"
+    exit 1
+}
+
+py_hook
+
