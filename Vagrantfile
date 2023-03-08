@@ -76,7 +76,7 @@ Vagrant.configure("2") do |config|
   
    config.vm.provision "shell", inline: <<-SHELL
     sudo su -
-    pkg install -y htop mc git py39-pip nano vim tmux
+    pkg install -y htop mc git py39-pip nano vim tmux snoopy
     pip install -U pip
     echo "Get freebsd src"
     git clone -b  stable/12 --depth 1 https://git.freebsd.org/src.git /usr/src
