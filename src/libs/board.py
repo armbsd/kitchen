@@ -52,12 +52,142 @@ def board_default_installworld (st:Board):
 def board_default_installkernel (st:Board):
     freebsd_installkernel(Board)
 
-def board_default_goodbye (st:Board):
-    print ("DONE.")
-    print (f"Completed disk image is in: {board_generate_image_name(st)}")
-    print ("")
-    print ("Copy to a suitable memory card using a command such as:")
-    print (f"dd if={board_generate_image_name(st)} of=/dev/da0 bs=1m")
-    print ("(Replace /dev/da0 with the appropriate path for your card reader.)")
-    print ("")
+# Default implementations of board routines.
 
+# Boards that need more than this can define their own.
+def board_mountpoint_defaults():
+    global BOARD_UFS_MOUNTPOINT_PREFIX, BOARD_FREEBSD_MOUNTPOINT_PREFIX, BOARD_FAT_MOUNTPOINT_PREFIX, BOARD_BOOT_MOUNTPOINT_PREFIX
+    if not BOARD_UFS_MOUNTPOINT_PREFIX:
+        BOARD_UFS_MOUNTPOINT_PREFIX = f"{WORKDIR}/_.mount.ufs"
+    if not BOARD_FREEBSD_MOUNTPOINT_PREFIX:
+        BOARD_FREEBSD_MOUNTPOINT_PREFIX = f"{WORKDIR}/_.mount.freebsd"
+    if not BOARD_FAT_MOUNTPOINT_PREFIX:
+        BOARD_FAT_MOUNTPOINT_PREFIX = f"{WORKDIR}/_.mount.fat"
+    if not BOARD_BOOT_MOUNTPOINT_PREFIX:
+        BOARD_BOOT_MOUNTPOINT_PREFIX = f"{WORKDIR}/_.mount.boot"
+
+# Default is to install world ...
+FREEBSD_INSTALL_WORLD = True
+
+# List of all board dirs.
+BOARDDIRS = []
+
+# the board's name, later to be used in IMGNAMe
+BOARDNAME = ""
+
+# $1: name of board directory
+def board_setup(board_name):
+    global BOARDDIRS, BOARDNAME
+    BOARDDIR = f"{TOPDIR}/board/{board_name}"
+    BOARDNAME = board_name
+    if not os.path.exists(f"{BOARDDIR}/setup.sh"):
+        print(f"Can't setup board {board_name}.")
+        print(f"No setup.sh in {BOARDDIR}.")
+        exit(1)
+    BOARDDIRS.append(BOARDDIR)
+    print(f"Board: {board_name}")
+    exec(open(f"{BOARDDIR}/setup.sh").read())
+    PRIORITY = 20
+    strategy_add(PHASE_FREEBSD_BOARD_INSTALL, board_overlay_files, BOARDDIR)
+    BOARDDIR = None
+
+def board_generate_image_name():
+    global IMG
+    if not IMGDIR:
+        _IMGDIR = WORKDIR
+    else:
+        _IMGDIR = IMGDIR
+    if IMGNAME:
+        eval(f"IMG = {_IMGDIR}/{IMGNAME}")
+    if not IMG:
+        if not SOURCE_VERSION:
+            IMG = f"{_IMGDIR}/FreeBSD-{TARGET_ARCH}-{FREEBSD_MAJOR_VERSION}-{KERNCONF}-{BOARDNAME}.img"
+        else:
+            IMG = f"{_IMGDIR}/FreeBSD-{TARGET_ARCH}-{FREEBSD_VERSION}-{KERNCONF}-{SOURCE_VERSION}-{BOARDNAME}.img"
+    print("Image name is:")
+    print(f"    {IMG}")
+
+# Run this late, so we print the image name after other post-config has had a chance
+PRIORITY = 200
+strategy_add(PHASE_POST_CONFIG, board_generate_image_name)
+
+# $1 - BOARDDIR
+# Registered from the end of board_setup so that it can get the BOARDDIR
+# as an argument. (There are rare cases where we actually load
+# more than one board definition; in those cases, this will get
+# registered and run once for each BOARDDIR.)
+# TODO: Are there other examples of this kind of thing?
+# If so, is there a better mechanism?
+def board_overlay_files(BOARDDIR):
+    if os.path.isdir(f"{BOARDDIR}/overlay"):
+        print(f"Overlaying board-specific files from {BOARDDIR}/overlay")
+        subprocess.run(["cd", f"{BOARDDIR}/overlay", "&&", "find", ".", "|", "cpio", "-pmud", BOARD_FREEBSD_MOUNTPOINT], shell=True, check=True)
+
+def board_defined():
+    if not BOARDDIRS:
+        print("No board setup?")
+        print(f"Make sure a suitable board_setup command appears at the top of {CONFIGFILE}")
+        exit(1)
+
+strategy_add(PHASE_POST_CONFIG, board_defined)
+
+# TODO: Not every board requires -CURRENT; copy this into all the
+# board setups and remove it from here.
+strategy_add(PHASE_CHECK, freebsd_current_test)
+
+def board_check_image_size_set():
+    # Check that IMAGE_SIZE is set.
+    if not IMAGE_SIZE:
+        print("Error: $IMAGE_SIZE not set.")
+        exit(1)
+
+strategy_add(PHASE_CHECK, board_check_image_size_set)
+
+def board_default_create_image():
+    disk_create_image(IMG, IMAGE_SIZE)
+
+strategy_add(PHASE_IMAGE_BUILD_LWW, board_default_create_image)
+
+# Default is to create a single UFS partition inside an MBR
+def board_default_partition_image():
+    disk_partition_mbr()
+    disk_ufs_create()
+
+strategy_add(PHASE_PARTITION_LWW, board_default_partition_image)
+
+# Default mounts all the FreeBSD partitions
+def board_default_mount_partitions():
+    board_mount_all()
+
+strategy_add(PHASE_MOUNT_LWW, board_default_mount_partitions)
+
+def board_default_buildworld():
+    freebsd_buildworld()
+
+strategy_add(PHASE_BUILD_WORLD, board_default_buildworld)
+
+def board_default_buildkernel():
+    freebsd_buildkernel()
+
+strategy_add(PHASE_BUILD_KERNEL, board_default_buildkernel)
+
+def board_default_installworld():
+    if FREEBSD_INSTALL_WORLD:
+        freebsd_installworld(BOARD_FREEBSD_MOUNTPOINT)
+
+strategy_add(PHASE_FREEBSD_INSTALLWORLD_LWW, board_default_installworld)
+
+def board_default_installkernel():
+    freebsd_installkernel()
+
+# Note: we don't automatically put installkernel into the
+# strategy here because different boards install the kernel
+# into different places (e.g., separate firmware or
+# separate partition).
+
+def board_default_goodbye():
+    print("DONE.")
+    print(f"Completed disk image is in: {IMG}")
+    print()
+    print("Copy to a suitable memory card using a command such as:")
+    print(f"dd if={IMG} of=/dev/da0 bs=1m")

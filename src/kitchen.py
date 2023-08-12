@@ -20,10 +20,14 @@ def check_src():
     log.info("Found firmware port in: \n\t\t\t/usr/local/share/rpi-firmware")
 
 
+git_versions = {12:"stable/12", 13:"stable/13", 14:"head"}
+
 @click.command()
 @click.option('--build/--no-build', default=False, help="Build source code.") 
 @click.option('--test/--no-test', default=False, help="Test flag.")
 @click.option('--git-clone/--no-git-clone', default=False, help="Clone src from FreeBSD git repo.")
+@click.argument('src', default='/usr/src')
+@click.argument('version', default='13.0-CURRENT')
 @click.option('--make-image/--no-make-image', default=False, help="Make image.")
 
 def main(build, test, git_clone, make_image):

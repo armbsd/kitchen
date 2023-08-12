@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "freebsd/FreeBSD-12.4-STABLE"
+  config.vm.box = "freebsd/FreeBSD-13.2-STABLE"
   config.disksize.size = '70GB'
 
   # config.vm.synced_folder "home/", "/home/vagrant"
@@ -78,8 +78,8 @@ Vagrant.configure("2") do |config|
     sudo su -
     pkg install -y htop mc git py39-pip nano vim tmux snoopy
     pip install -U pip
-    echo "Get freebsd src"
-    git clone -b  stable/12 --depth 1 https://git.freebsd.org/src.git /usr/src
+    # echo "Get freebsd src"
+    # git clone -b  stable/12 --depth 1 https://git.freebsd.org/src.git /usr/src
     echo "Get kitchen src"
     git clone https://github.com/armbsd/kitchen.git
  SHELL
